@@ -39,17 +39,27 @@ function calculateDistance(point1, point2) {
     throw new Error('Longitude must be between -180 and 180 degrees');
   }
   
-  const R = 3440.065; // Earth's radius in nautical miles
+  // Earth's mean radius in nautical miles (more precise value)
+  // 1 nautical mile = 1.852 km, Earth's mean radius = 6,371.0088 km
+  const R = 6371.0088 / 1.852; // ≈ 3440.069 nm
+  
+  // Convert latitude and longitude to radians
+  const radLat1 = toRad(lat1);
+  const radLat2 = toRad(lat2);
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   
+  // Haversine formula
   const a = 
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+    Math.cos(radLat1) * Math.cos(radLat2) * 
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
     
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  const distance = R * c;
+  
+  // Round to 6 decimal places to avoid floating point precision issues
+  return parseFloat(distance.toFixed(6));
 }
 
 /**
