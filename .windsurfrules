@@ -1,0 +1,5 @@
+- Build system is tsx
+- Use TypeScript
+- Add test on new functions
+- Prefer functional programming over classes
+- use Vitest for testing

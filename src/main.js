@@ -3,8 +3,8 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
-import GpxProcessor from './src/gpxProcessor.js';
-import GpxBuilder from './src/gpxBuilder.js';
+import GpxProcessor from './gpxProcessor.js';
+import GpxBuilder from './gpxBuilder.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,7 +85,7 @@ async function main() {
     
     // Automatically convert the generated JSON files to GPX
     console.log('\nConverting JSON files to GPX...');
-    const outputDir = path.join(__dirname, 'output');
+    const outputDir = path.join(__dirname, '../output');
     const jsonFiles = fs.readdirSync(outputDir)
       .filter(file => file.endsWith('.json') && !file.endsWith('-reduced.json'));
     
