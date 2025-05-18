@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import GpxBuilder from './src/gpxBuilder.js';
+import GpxBuilder from './gpxBuilder.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

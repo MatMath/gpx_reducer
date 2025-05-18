@@ -1,12 +1,10 @@
 {
   "name": "gpx_map",
   "version": "1.0.0",
-  "main": "processGpx.js",
+  "main": "main.js",
   "type": "module",
   "scripts": {
-    "start": "node processGpx.js",
-    "process": "node processGpx.js",
-    "json2gpx": "node jsonToGpx.js",
+    "start": "node main.js",
     "test": "mocha test/**/*.test.js",
     "test:watch": "nodemon --watch '**/*.js' --exec 'npm test'"
   },
