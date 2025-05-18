@@ -3,7 +3,11 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import GpxProcessor from './src/gpxProcessor.js';
+
+const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,6 +85,27 @@ async function main() {
     }
     
     console.log('Processing complete!');
+    
+    // Automatically convert the generated JSON files to GPX
+    console.log('\nConverting JSON files to GPX...');
+    const outputDir = path.join(__dirname, 'output');
+    const jsonFiles = fs.readdirSync(outputDir)
+      .filter(file => file.endsWith('.json') && !file.endsWith('-reduced.json'));
+    
+    for (const jsonFile of jsonFiles) {
+      const jsonPath = path.join(outputDir, jsonFile);
+      const gpxPath = jsonPath.replace(/\.json$/, '.gpx');
+      
+      try {
+        console.log(`- Converting ${jsonFile} to GPX...`);
+        await execAsync(`npm run json2gpx ${jsonPath} ${gpxPath}`);
+        console.log(`  ✓ Created ${path.basename(gpxPath)}`);
+      } catch (error) {
+        console.error(`  ✗ Failed to convert ${jsonFile}:`, error.message);
+      }
+    }
+    
+    console.log('\nAll conversions complete!');
   } catch (error) {
     console.error('An error occurred:', error.message);
     process.exit(1);

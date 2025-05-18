@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node processGpx.js",
     "process": "node processGpx.js",
+    "json2gpx": "node jsonToGpx.js",
     "test": "mocha test/**/*.test.js",
     "test:watch": "nodemon --watch '**/*.js' --exec 'npm test'"
   },
