@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DirectionUtils } from '../src/directionUtils.js';
+import { DirectionUtils } from '../src/directionUtils';
 
 describe('DirectionUtils', () => {
   describe('hasDirectionChanged', () => {

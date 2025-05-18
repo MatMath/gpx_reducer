@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import GpxBuilder from '../src/gpxBuilder.js';
+import GpxBuilder from '../src/gpxBuilder';
 
 describe('GpxBuilder', () => {
   let builder;

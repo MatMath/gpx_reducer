@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { calculateDistance } from '../src/statistics.js';
+import { calculateDistance } from '../src/statistics';
 
 // Known distances in nautical miles (from online calculators)
 const testCases = [

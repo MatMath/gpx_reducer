@@ -1,10 +1,10 @@
 {
   "name": "gpx_map",
   "version": "1.0.0",
-  "main": "src/main.js",
+  "main": "src/main.ts",
   "type": "module",
   "scripts": {
-    "start": "rm -rf output && tsx src/main.js",
+    "start": "rm -rf output && tsx src/main.ts",
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",

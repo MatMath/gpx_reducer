@@ -2,8 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import { parseString } from 'xml2js';
 import { fileURLToPath } from 'url';
-import { DirectionUtils } from './directionUtils.js';
-import { calculateRouteStatistics } from './statistics.js';
+import { DirectionUtils } from './directionUtils';
+import { calculateRouteStatistics } from './statistics';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

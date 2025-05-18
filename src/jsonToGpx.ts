@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import GpxBuilder from './gpxBuilder.js';
+import GpxBuilder from './gpxBuilder';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,7 +10,7 @@ async function main() {
   try {
     // Check if input file is provided
     if (process.argv.length < 3) {
-      console.error('Usage: node jsonToGpx.js <input-json-file> [output-gpx-file]');
+      console.error('Usage: node jsonToGpx <input-json-file> [output-gpx-file]');
       console.error('If output file is not provided, it will use the input filename with .gpx extension');
       process.exit(1);
     }

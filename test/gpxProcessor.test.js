@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import GpxProcessor from '../src/gpxProcessor.js';
+import GpxProcessor from '../src/gpxProcessor';
 
 describe('GpxProcessor', () => {
   describe('reducePointsByDirection', () => {

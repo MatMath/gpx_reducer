@@ -3,8 +3,8 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
-import GpxProcessor from './gpxProcessor.js';
-import GpxBuilder from './gpxBuilder.js';
+import GpxProcessor from './gpxProcessor';
+import GpxBuilder from './gpxBuilder';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
