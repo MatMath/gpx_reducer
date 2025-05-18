@@ -1,11 +1,9 @@
 import { expect } from 'chai';
-import GpxProcessor from '../src/gpxProcessor';
+import { reducePointsByDirection } from '../src/gpxProcessor';
 
 describe('GpxProcessor', () => {
   describe('reducePointsByDirection', () => {
     it('should keep points where direction changes', () => {
-      const processor = new GpxProcessor();
-      
       const points = [
         { lat: '43.307228', lon: '16.457782' },
         { lat: '43.306211', lon: '16.454683' },
@@ -16,7 +14,7 @@ describe('GpxProcessor', () => {
         { lat: '43.315637', lon: '16.408790' }
       ];
 
-      const reducedPoints = processor.reducePointsByDirection(points);
+      const reducedPoints = reducePointsByDirection(points);
       
       // Should keep first point, last point, and points where direction changes
       expect(reducedPoints).toHaveLength(4);
