@@ -72,29 +72,33 @@ class GpxProcessor {
    * @returns {Array} Reduced array of points
    */
   reducePointsByDirection(points) {
-    if (!points || points.length <= 2) return points;
+    if (!points || points.length <= 2) return [...points];
     
     const reducedPoints = [points[0]]; // Always include first point
     let previousPoint = points[0];
+    let currentPoint = points[1];
     
-    // Initialize directions (0 = no change, 1 = increasing, -1 = decreasing)
-    let directions = { lat: 0, lon: 0 };
+    // Initialize directions based on first two points
+    let directions = DirectionUtils.getCurrentDirections(currentPoint, previousPoint);
+    reducedPoints.push(currentPoint);
     
-    for (let i = 1; i < points.length; i++) {
-      const currentPoint = points[i];
+    for (let i = 2; i < points.length; i++) {
+      const nextPoint = points[i];
+      const newDirections = DirectionUtils.getCurrentDirections(nextPoint, currentPoint);
       
-      if (this._hasDirectionChanged(currentPoint, previousPoint, directions)) {
-        // Update directions for next comparison
-        directions = DirectionUtils.getCurrentDirections(currentPoint, previousPoint);
-        
-        reducedPoints.push(currentPoint);
-        previousPoint = currentPoint;
+      // Check if direction has changed for either lat or lon
+      if (newDirections.lat !== directions.lat || newDirections.lon !== directions.lon) {
+        reducedPoints.push(nextPoint);
+        directions = newDirections;
       }
+      
+      currentPoint = nextPoint;
     }
     
-    // Always include last point if it's not already included
-    if (points.length > 1 && !reducedPoints.includes(points[points.length - 1])) {
-      reducedPoints.push(points[points.length - 1]);
+    // Ensure last point is included if not already
+    const lastPoint = points[points.length - 1];
+    if (reducedPoints[reducedPoints.length - 1] !== lastPoint) {
+      reducedPoints.push(lastPoint);
     }
     
     return reducedPoints;

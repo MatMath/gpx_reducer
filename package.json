@@ -6,10 +6,9 @@
   "scripts": {
     "start": "node processGpx.js",
     "process": "node processGpx.js",
-    "test": "node --test",
+    "test": "mocha test/**/*.test.js",
     "test:watch": "nodemon --watch '**/*.js' --exec 'npm test'"
   },
-  "type": "module",
   "author": "",
   "license": "ISC",
   "description": "GPX file processor for optimizing and analyzing GPS track data",
@@ -18,6 +17,8 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "chai": "^5.2.0",
+    "mocha": "^11.3.0",
     "nodemon": "^3.0.1"
   }
 }
