@@ -57,14 +57,12 @@ async function main() {
             console.log(`\n  ${routeName}`);
             console.log('  ' + '─'.repeat(50));
             console.log(`    Points: ${stat.originalPoints} → ${stat.reducedPoints} (${stat.reduction} reduction)`);
-            console.log(`    Distance: ${stat.totalDistance} nautical miles`);
+            console.log(`    Straight-line distance: ${stat.straightLineDistance} nm`);
+            console.log(`    Boat distance: ${stat.boatDistance} nm`);
             console.log(`    Direction changes: ${stat.directionChanges}`);
             
             // Display initial direction and segment length if available
             if (stat.directions && stat.directions.length > 0) {
-              const firstSegment = stat.directions[0];
-              console.log(`    Initial direction: ${firstSegment.direction.toFixed(1)}° (${firstSegment.length} nm)`);
-              
               // Display all segments if there are multiple
               if (stat.directions.length > 1) {
                 console.log('    \n    Route Segments:');

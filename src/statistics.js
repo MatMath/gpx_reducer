@@ -145,12 +145,18 @@ function calculateRouteStatistics(originalPoints, reducedPoints) {
     const reducedLength = reducedPoints.length;
     const reduction = ((1 - (reducedLength / originalLength)) * 100).toFixed(2);
     
-    // Calculate total distance if we have at least 2 points
-    let totalDistance = 0;
+    // Calculate total straight-line distance (over ground)
+    let straightLineDistance = 0;
+    if (originalLength >= 2) {
+      straightLineDistance = calculateDistance(originalPoints[0], originalPoints[originalLength - 1]);
+    }
+    
+    // Calculate total boat distance (sum of all segments)
+    let boatDistance = 0;
     if (originalLength >= 2) {
       for (let i = 1; i < originalLength; i++) {
         try {
-          totalDistance += calculateDistance(originalPoints[i - 1], originalPoints[i]);
+          boatDistance += calculateDistance(originalPoints[i - 1], originalPoints[i]);
         } catch (error) {
           console.warn(`Error calculating distance between points ${i-1} and ${i}:`, error.message);
         }
@@ -191,7 +197,8 @@ function calculateRouteStatistics(originalPoints, reducedPoints) {
       originalPoints: originalLength,
       reducedPoints: reducedLength,
       reduction: `${reduction}%`,
-      totalDistance: parseFloat(totalDistance.toFixed(2)),
+      straightLineDistance: parseFloat(straightLineDistance.toFixed(2)),
+      boatDistance: parseFloat(boatDistance.toFixed(2)),
       directionChanges,
       directions,
       closestLocations: {
