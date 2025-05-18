@@ -71,7 +71,7 @@ class GpxProcessor {
    * @param {Array} points - Array of points with lat/lon
    * @returns {Array} Reduced array of points
    */
-  async reducePointsByDirection(points) {
+  reducePointsByDirection(points) {
     if (!points || points.length <= 2) return points;
     
     const reducedPoints = [points[0]]; // Always include first point
