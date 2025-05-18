@@ -157,7 +157,7 @@ function calculateRouteStatistics(originalPoints, reducedPoints) {
       }
     }
     
-    // Calculate directions and count changes if we have at least 2 reduced points
+    // Calculate directions and segment lengths if we have at least 2 reduced points
     let directionChanges = 0;
     const directions = [];
     
@@ -166,17 +166,20 @@ function calculateRouteStatistics(originalPoints, reducedPoints) {
       
       for (let i = 1; i < reducedLength; i++) {
         try {
-          const bearing = calculateBearing(reducedPoints[i - 1], reducedPoints[i]);
-          directions.push(bearing);
+          const startPoint = reducedPoints[i - 1];
+          const endPoint = reducedPoints[i];
+          const bearing = calculateBearing(startPoint, endPoint);
+          const segmentLength = calculateDistance(startPoint, endPoint);
           
-          if (previousBearing !== null) {
-            // Consider a direction change if the bearing changes by more than 5 degrees
-            const bearingDiff = Math.abs(bearing - previousBearing);
-            const normalizedDiff = Math.min(bearingDiff, 360 - bearingDiff);
-            if (normalizedDiff > 5) { // Threshold of 5 degrees
-              directionChanges++;
-            }
+          directions.push({
+            direction: bearing,
+            length: parseFloat(segmentLength.toFixed(2)) // Round to 2 decimal places
+          });
+          
+          if (previousBearing !== null && Math.abs(bearing - previousBearing) > 1) {
+            directionChanges++;
           }
+          
           previousBearing = bearing;
         } catch (error) {
           console.warn(`Error calculating bearing between reduced points ${i-1} and ${i}:`, error.message);

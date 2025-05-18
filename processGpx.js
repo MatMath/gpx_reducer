@@ -60,9 +60,18 @@ async function main() {
             console.log(`    Distance: ${stat.totalDistance} nautical miles`);
             console.log(`    Direction changes: ${stat.directionChanges}`);
             
-            // Display initial direction if available
+            // Display initial direction and segment length if available
             if (stat.directions && stat.directions.length > 0) {
-              console.log(`    Initial direction: ${stat.directions[0].toFixed(1)}°`);
+              const firstSegment = stat.directions[0];
+              console.log(`    Initial direction: ${firstSegment.direction.toFixed(1)}° (${firstSegment.length} nm)`);
+              
+              // Display all segments if there are multiple
+              if (stat.directions.length > 1) {
+                console.log('    \n    Route Segments:');
+                stat.directions.forEach((segment, idx) => {
+                  console.log(`      Segment ${idx + 1}: ${segment.direction.toFixed(1)}° for ${segment.length} nm`);
+                });
+              }
             }
             console.log('  ' + '─'.repeat(50));
           });
