@@ -1,6 +1,10 @@
-const fs = require('fs-extra');
-const path = require('path');
-const { parseString } = require('xml2js');
+import fs from 'fs-extra';
+import path from 'path';
+import { parseString } from 'xml2js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class GpxProcessor {
   constructor() {
@@ -81,4 +85,4 @@ class GpxProcessor {
   }
 }
 
-module.exports = GpxProcessor;
+export default GpxProcessor;

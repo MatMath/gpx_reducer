@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
-const path = require('path');
-const fs = require('fs-extra');
-const GpxProcessor = require('./src/gpxProcessor');
+import path from 'path';
+import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
+import GpxProcessor from './src/gpxProcessor.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function main() {
   try {
