@@ -47,7 +47,19 @@ async function main() {
         console.log(`- Processed: ${path.basename(file)}`);
         console.log(`  Routes: ${result.routeCount}`);
         console.log(`  Waypoints: ${result.waypointCount}`);
-        console.log(`  Tracks: ${result.trackCount}\n`);
+        console.log(`  Tracks: ${result.trackCount}`);
+        
+        // Display reduction statistics
+        if (result.stats && result.stats.length > 0) {
+          console.log('\n  Reduction Statistics:');
+          result.stats.forEach((stat, index) => {
+            console.log(`  Route ${index + 1}:`);
+            console.log(`    Original points: ${stat.originalPoints}`);
+            console.log(`    Reduced points: ${stat.reducedPoints}`);
+            console.log(`    Reduction: ${stat.reduction}`);
+          });
+        }
+        console.log('');
       } catch (error) {
         console.error(`Failed to process ${file}:`, error.message);
       }

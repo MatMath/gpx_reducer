@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { parseString } from 'xml2js';
 import { fileURLToPath } from 'url';
+import { DirectionUtils } from './directionUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +56,51 @@ class GpxProcessor {
   }
 
   /**
+   * Check if direction has changed for either latitude or longitude
+   * @param {Object} current - Current point {lat, lon}
+   * @param {Object} previous - Previous point {lat, lon}
+   * @param {Object} directions - Previous directions {lat: number, lon: number}
+   * @returns {boolean} True if direction changed
+   */
+  _hasDirectionChanged(current, previous, directions) {
+    return DirectionUtils.hasDirectionChanged(current, previous, directions);
+  }
+
+  /**
+   * Reduce points by only keeping points where direction changes
+   * @param {Array} points - Array of points with lat/lon
+   * @returns {Array} Reduced array of points
+   */
+  async reducePointsByDirection(points) {
+    if (!points || points.length <= 2) return points;
+    
+    const reducedPoints = [points[0]]; // Always include first point
+    let previousPoint = points[0];
+    
+    // Initialize directions (0 = no change, 1 = increasing, -1 = decreasing)
+    let directions = { lat: 0, lon: 0 };
+    
+    for (let i = 1; i < points.length; i++) {
+      const currentPoint = points[i];
+      
+      if (this._hasDirectionChanged(currentPoint, previousPoint, directions)) {
+        // Update directions for next comparison
+        directions = DirectionUtils.getCurrentDirections(currentPoint, previousPoint);
+        
+        reducedPoints.push(currentPoint);
+        previousPoint = currentPoint;
+      }
+    }
+    
+    // Always include last point if it's not already included
+    if (points.length > 1 && !reducedPoints.includes(points[points.length - 1])) {
+      reducedPoints.push(points[points.length - 1]);
+    }
+    
+    return reducedPoints;
+  }
+
+  /**
    * Process a single GPX file
    * @param {string} filePath - Path to the GPX file
    */
@@ -64,6 +110,28 @@ class GpxProcessor {
       
       // Parse GPX to JSON
       const jsonData = await this.parseGpxToJson(filePath);
+      
+      // Process routes if they exist
+      if (jsonData.gpx.rte) {
+        const routes = Array.isArray(jsonData.gpx.rte) ? jsonData.gpx.rte : [jsonData.gpx.rte];
+        
+        routes.forEach(route => {
+          if (route.rtept) {
+            const originalPoints = Array.isArray(route.rtept) ? route.rtept : [route.rtept];
+            const reducedPoints = this.reducePointsByDirection(originalPoints);
+            
+            // Add statistics to the route
+            route.stats = {
+              originalPoints: originalPoints.length,
+              reducedPoints: reducedPoints.length,
+              reduction: ((1 - (reducedPoints.length / originalPoints.length)) * 100).toFixed(2) + '%'
+            };
+            
+            // Replace with reduced points
+            route.rtept = reducedPoints;
+          }
+        });
+      }
       
       // Get the base filename without extension
       const fileName = path.basename(filePath, path.extname(filePath));
@@ -76,7 +144,10 @@ class GpxProcessor {
         outputFile: outputPath,
         routeCount: jsonData.gpx.rte ? (Array.isArray(jsonData.gpx.rte) ? jsonData.gpx.rte.length : 1) : 0,
         waypointCount: jsonData.gpx.wpt ? (Array.isArray(jsonData.gpx.wpt) ? jsonData.gpx.wpt.length : 1) : 0,
-        trackCount: jsonData.gpx.trk ? (Array.isArray(jsonData.gpx.trk) ? jsonData.gpx.trk.length : 1) : 0
+        trackCount: jsonData.gpx.trk ? (Array.isArray(jsonData.gpx.trk) ? jsonData.gpx.trk.length : 1) : 0,
+        stats: jsonData.gpx.rte ? (Array.isArray(jsonData.gpx.rte) ? 
+          jsonData.gpx.rte.map(r => r.stats) : 
+          [jsonData.gpx.rte.stats]) : []
       };
     } catch (error) {
       console.error(`Error processing file ${filePath}:`, error.message);

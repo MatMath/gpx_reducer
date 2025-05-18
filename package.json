@@ -6,13 +6,18 @@
   "scripts": {
     "start": "node processGpx.js",
     "process": "node processGpx.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "test:watch": "nodemon --watch '**/*.js' --exec 'npm test'"
   },
+  "type": "module",
   "author": "",
   "license": "ISC",
   "description": "GPX file processor for optimizing and analyzing GPS track data",
   "dependencies": {
     "fs-extra": "^11.2.0",
     "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
