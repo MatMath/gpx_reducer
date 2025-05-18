@@ -19,11 +19,11 @@ describe('GpxProcessor', () => {
       const reducedPoints = processor.reducePointsByDirection(points);
       
       // Should keep first point, last point, and points where direction changes
-      expect(reducedPoints).to.have.lengthOf(4);
-      expect(reducedPoints[0]).to.deep.equal(points[0]); // First point
-      expect(reducedPoints[1]).to.deep.equal(points[1]); // Second point (needed to establish initial direction)
-      expect(reducedPoints[2]).to.deep.equal(points[5]); // Point where direction changes
-      expect(reducedPoints[3]).to.deep.equal(points[6]); // Last point
+      expect(reducedPoints).toHaveLength(4);
+      expect(reducedPoints[0]).toEqual(points[0]); // First point
+      expect(reducedPoints[1]).toEqual(points[1]); // Second point (needed to establish initial direction)
+      expect(reducedPoints[2]).toEqual(points[5]); // Point where direction changes
+      expect(reducedPoints[3]).toEqual(points[6]); // Last point
     });
   });
 });

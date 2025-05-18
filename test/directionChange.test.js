@@ -1,5 +1,5 @@
+import { describe, it, expect } from 'vitest';
 import { DirectionUtils } from '../src/directionUtils.js';
-import { expect } from 'chai';
 
 describe('DirectionUtils', () => {
   describe('hasDirectionChanged', () => {
@@ -20,23 +20,23 @@ describe('DirectionUtils', () => {
       
       // First point to second point (decreasing lat)
       directions = DirectionUtils.getCurrentDirections(points[1], points[0]);
-      expect(directions.lat).to.equal(-1);
+      expect(directions.lat).toBe(-1);
       
       // Second point to third point (still decreasing lat)
       directions = DirectionUtils.getCurrentDirections(points[2], points[1]);
-      expect(directions.lat).to.equal(-1);
+      expect(directions.lat).toBe(-1);
       
       // Third point to fourth point (still decreasing lat)
       directions = DirectionUtils.getCurrentDirections(points[3], points[2]);
-      expect(directions.lat).to.equal(-1);
+      expect(directions.lat).toBe(-1);
       
       // Fourth point to fifth point (still decreasing lat, but very small change)
       directions = DirectionUtils.getCurrentDirections(points[4], points[3]);
-      expect(directions.lat).to.equal(-1);
+      expect(directions.lat).toBe(-1);
       
       // Fifth point to sixth point (now increasing lat - direction change!)
       const changed = DirectionUtils.hasDirectionChanged(points[5], points[4], directions);
-      expect(changed).to.be.true;
+      expect(changed).toBe(true);
     });
   });
 });

@@ -43,24 +43,32 @@ describe('Distance Calculation Tests', () => {
   testCases.forEach(({ name, point1, point2, expectedDistance, tolerance }) => {
     it(`should calculate distance for ${name}`, () => {
       const distance = calculateDistance(point1, point2);
-      // Use provided tolerance or default to 1% if not specified
-      tolerance = tolerance || expectedDistance * 0.01;
       
-      // Check if the calculated distance is within 1% of the expected distance
-      expect(distance).to.be.closeTo(expectedDistance, tolerance);
+      // Special case for zero distance
+      if (expectedDistance === 0) {
+        expect(distance).toBe(0);
+      } else {
+        // Use provided tolerance or default to 1% if not specified
+        tolerance = tolerance || expectedDistance * 0.01;
+        
+        // For Vitest, we need to specify the number of decimal places for the comparison
+        const decimalPlaces = Math.max(0, -Math.floor(Math.log10(tolerance)));
+        expect(distance).toBeCloseTo(expectedDistance, decimalPlaces);
+      }
       
+      // Log test details
       console.log(`\n${name}:`);
       console.log(`  Expected: ${expectedDistance.toFixed(2)} nm`);
       console.log(`  Calculated: ${distance.toFixed(2)} nm`);
       console.log(`  Difference: ${Math.abs(distance - expectedDistance).toFixed(2)} nm`);
-      console.log(`  Tolerance: ±${tolerance.toFixed(2)} nm`);
+      console.log(`  Tolerance: ±${(tolerance || 0).toFixed(2)} nm`);
     });
   });
 
   it('should throw error for invalid points', () => {
-    expect(() => calculateDistance(null, { lat: 40, lon: -74 })).to.throw('Invalid points');
-    expect(() => calculateDistance({ lat: 40 }, { lat: 40, lon: -74 })).to.throw('Invalid points');
-    expect(() => calculateDistance({ lat: 'invalid', lon: -74 }, { lat: 40, lon: -74 })).to.throw('Invalid coordinate values');
+    expect(() => calculateDistance(null, { lat: 40, lon: -74 })).toThrow('Invalid points');
+    expect(() => calculateDistance({ lat: 40 }, { lat: 40, lon: -74 })).toThrow('Invalid points');
+    expect(() => calculateDistance({ lat: 'invalid', lon: -74 }, { lat: 40, lon: -74 })).toThrow('Invalid coordinate values');
   });
 
   it('should handle points near the international date line', () => {
@@ -68,7 +76,7 @@ describe('Distance Calculation Tests', () => {
     const point2 = { lat: 65, lon: -179.9 };  // Just east of the date line
     const distance = calculateDistance(point1, point2);
     // Should be a short distance across the date line, not all the way around the world
-    expect(distance).to.be.lessThan(100);
+    expect(distance).toBeLessThan(100);
     console.log('\nDate Line Crossing Test:');
     console.log(`  Calculated distance: ${distance.toFixed(2)} nm`);
   });

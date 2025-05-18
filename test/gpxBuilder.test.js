@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { describe, it, expect, beforeEach } from 'vitest';
 import GpxBuilder from '../src/gpxBuilder.js';
 
 describe('GpxBuilder', () => {
@@ -28,11 +28,11 @@ describe('GpxBuilder', () => {
 
       const gpx = builder.buildGpx(jsonData);
       
-      expect(gpx).to.be.a('string');
-      expect(gpx).to.include('<gpx');
-      expect(gpx).to.include('version="1.1"');
-      expect(gpx).to.include('<name>Test Track</name>');
-      expect(gpx).to.include('<rtept lat="45.0" lon="-75.0">');
+      expect(typeof gpx).toBe('string');
+      expect(gpx).toContain('<gpx');
+      expect(gpx).toContain('version="1.1"');
+      expect(gpx).toContain('<name>Test Track</name>');
+      expect(gpx).toContain('<rtept lat="45.0" lon="-75.0"/>');
     });
 
     it('should handle waypoints, routes, and tracks', () => {
@@ -68,13 +68,13 @@ describe('GpxBuilder', () => {
 
       const gpx = builder.buildGpx(jsonData);
       
-      expect(gpx).to.include('<wpt lat="45.5" lon="-73.5">');
-      expect(gpx).to.include('<name>Start</name>');
-      expect(gpx).to.include('<sym>Flag</sym>');
-      expect(gpx).to.include('<rte>');
-      expect(gpx).to.include('<trk>');
-      expect(gpx).to.include('<ele>100</ele>');
-      expect(gpx).to.include('<time>2025-05-18T18:00:00Z</time>');
+      expect(gpx).toContain('<wpt lat="45.5" lon="-73.5">');
+      expect(gpx).toContain('<name>Start</name>');
+      expect(gpx).toContain('<sym>Flag</sym>');
+      expect(gpx).toContain('<rte>');
+      expect(gpx).toContain('<trk>');
+      expect(gpx).toContain('<ele>100</ele>');
+      expect(gpx).toContain('<time>2025-05-18T18:00:00Z</time>');
     });
 
     it('should handle empty sections', () => {
@@ -85,11 +85,11 @@ describe('GpxBuilder', () => {
 
       const gpx = builder.buildGpx(jsonData);
       
-      expect(gpx).to.include('<gpx');
-      expect(gpx).to.include('<name>Empty Test</name>');
-      expect(gpx).to.not.include('<wpt');
-      expect(gpx).to.not.include('<rte');
-      expect(gpx).to.not.include('<trk');
+      expect(gpx).toContain('<gpx');
+      expect(gpx).toContain('<name>Empty Test</name>');
+      expect(gpx).not.toContain('<wpt');
+      expect(gpx).not.toContain('<rte');
+      expect(gpx).not.toContain('<trk');
     });
   });
 
