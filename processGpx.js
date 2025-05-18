@@ -49,14 +49,22 @@ async function main() {
         console.log(`  Waypoints: ${result.waypointCount}`);
         console.log(`  Tracks: ${result.trackCount}`);
         
-        // Display reduction statistics
+        // Display statistics for each route
         if (result.stats && result.stats.length > 0) {
-          console.log('\n  Reduction Statistics:');
+          console.log('\n  Route Statistics:');
           result.stats.forEach((stat, index) => {
-            console.log(`  Route ${index + 1}:`);
-            console.log(`    Original points: ${stat.originalPoints}`);
-            console.log(`    Reduced points: ${stat.reducedPoints}`);
-            console.log(`    Reduction: ${stat.reduction}`);
+            const routeName = stat.name ? ` - ${stat.name}` : 'N/A';
+            console.log(`\n  ${routeName}`);
+            console.log('  ' + '─'.repeat(50));
+            console.log(`    Points: ${stat.originalPoints} → ${stat.reducedPoints} (${stat.reduction} reduction)`);
+            console.log(`    Distance: ${stat.totalDistance} nautical miles`);
+            console.log(`    Direction changes: ${stat.directionChanges}`);
+            
+            // Display initial direction if available
+            if (stat.directions && stat.directions.length > 0) {
+              console.log(`    Initial direction: ${stat.directions[0].toFixed(1)}°`);
+            }
+            console.log('  ' + '─'.repeat(50));
           });
         }
         console.log('');

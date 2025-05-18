@@ -3,6 +3,7 @@ import path from 'path';
 import { parseString } from 'xml2js';
 import { fileURLToPath } from 'url';
 import { DirectionUtils } from './directionUtils.js';
+import { calculateRouteStatistics } from './statistics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -121,18 +122,44 @@ class GpxProcessor {
         
         routes.forEach(route => {
           if (route.rtept) {
+            // Ensure we have an array of points
             const originalPoints = Array.isArray(route.rtept) ? route.rtept : [route.rtept];
-            const reducedPoints = this.reducePointsByDirection(originalPoints);
             
-            // Add statistics to the route
-            route.stats = {
-              originalPoints: originalPoints.length,
-              reducedPoints: reducedPoints.length,
-              reduction: ((1 - (reducedPoints.length / originalPoints.length)) * 100).toFixed(2) + '%'
-            };
+            // Filter out any invalid points (missing lat/lon)
+            const validPoints = originalPoints.filter(point => 
+              point && 
+              typeof point.lat !== 'undefined' && 
+              typeof point.lon !== 'undefined' &&
+              !isNaN(parseFloat(point.lat)) && 
+              !isNaN(parseFloat(point.lon))
+            );
             
-            // Replace with reduced points
-            route.rtept = reducedPoints;
+            // Only process if we have at least 2 valid points
+            if (validPoints.length >= 2) {
+              const reducedPoints = this.reducePointsByDirection(validPoints);
+              
+              // Calculate statistics for the route
+              const stats = calculateRouteStatistics(validPoints, reducedPoints);
+              
+              // Add route name to stats if available
+              if (route.name) {
+                stats.name = route.name;
+              }
+              
+              // Add statistics to the route
+              route.stats = stats;
+              
+              // Replace with reduced points
+              route.rtept = reducedPoints;
+            } else {
+              // If not enough valid points, use default stats
+              route.stats = calculateRouteStatistics([], []);
+              route.rtept = validPoints;
+            }
+          } else {
+            // If no points, use default stats
+            route.stats = calculateRouteStatistics([], []);
+            route.rtept = [];
           }
         });
       }
@@ -143,16 +170,23 @@ class GpxProcessor {
       // Save the JSON file
       const outputPath = await this.saveJson(fileName, jsonData);
       
-      return {
+      // Prepare result with file and route information
+      const result = {
         inputFile: filePath,
         outputFile: outputPath,
         routeCount: jsonData.gpx.rte ? (Array.isArray(jsonData.gpx.rte) ? jsonData.gpx.rte.length : 1) : 0,
         waypointCount: jsonData.gpx.wpt ? (Array.isArray(jsonData.gpx.wpt) ? jsonData.gpx.wpt.length : 1) : 0,
         trackCount: jsonData.gpx.trk ? (Array.isArray(jsonData.gpx.trk) ? jsonData.gpx.trk.length : 1) : 0,
-        stats: jsonData.gpx.rte ? (Array.isArray(jsonData.gpx.rte) ? 
-          jsonData.gpx.rte.map(r => r.stats) : 
-          [jsonData.gpx.rte.stats]) : []
+        stats: []
       };
+      
+      // Add detailed stats for each route if they exist
+      if (jsonData.gpx.rte) {
+        const routes = Array.isArray(jsonData.gpx.rte) ? jsonData.gpx.rte : [jsonData.gpx.rte];
+        result.stats = routes.map(route => route.stats || {});
+      }
+      
+      return result;
     } catch (error) {
       console.error(`Error processing file ${filePath}:`, error.message);
       throw error;
