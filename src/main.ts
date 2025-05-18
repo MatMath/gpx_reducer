@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
 import GpxProcessor from './gpxProcessor';
-import GpxBuilder from './gpxBuilder';
+import { buildGpx } from './gpxBuilder';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,9 +89,6 @@ async function main() {
     const jsonFiles = fs.readdirSync(outputDir)
       .filter(file => file.endsWith('.json') && !file.endsWith('-reduced.json'));
     
-    // Convert the file back into GPX
-    const builder = new GpxBuilder();
-    
     for (const jsonFile of jsonFiles) {
       const jsonPath = path.join(outputDir, jsonFile);
       const gpxPath = jsonPath.replace(/\.json$/, '.gpx');
@@ -103,7 +100,7 @@ async function main() {
         const jsonData = await fs.readJson(jsonPath);
         
         // Convert to GPX
-        const gpxContent = builder.buildGpx(jsonData.gpx || jsonData);
+        const gpxContent = buildGpx(jsonData.gpx || jsonData);
         
         // Write GPX file
         await fs.writeFile(gpxPath, gpxContent);

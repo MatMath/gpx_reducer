@@ -1,13 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import GpxBuilder from '../src/gpxBuilder';
+import { describe, it, expect } from 'vitest';
+import { buildGpx, buildMetadata, buildWaypoints } from '../src/gpxBuilder';
 
-describe('GpxBuilder', () => {
-  let builder;
-
-  beforeEach(() => {
-    builder = new GpxBuilder();
-  });
-
+describe('GPX Builder', () => {
   describe('buildGpx', () => {
     it('should generate valid GPX with minimal data', () => {
       const jsonData = {
@@ -26,7 +20,7 @@ describe('GpxBuilder', () => {
         ]
       };
 
-      const gpx = builder.buildGpx(jsonData);
+      const gpx = buildGpx(jsonData);
       
       expect(typeof gpx).toBe('string');
       expect(gpx).toContain('<gpx');
@@ -66,7 +60,7 @@ describe('GpxBuilder', () => {
         ]
       };
 
-      const gpx = builder.buildGpx(jsonData);
+      const gpx = buildGpx(jsonData);
       
       expect(gpx).toContain('<wpt lat="45.5" lon="-73.5">');
       expect(gpx).toContain('<name>Start</name>');
@@ -83,7 +77,7 @@ describe('GpxBuilder', () => {
         // No waypoints, routes, or tracks
       };
 
-      const gpx = builder.buildGpx(jsonData);
+      const gpx = buildGpx(jsonData);
       
       expect(gpx).toContain('<gpx');
       expect(gpx).toContain('<name>Empty Test</name>');
@@ -93,7 +87,7 @@ describe('GpxBuilder', () => {
     });
   });
 
-  describe('_buildMetadata', () => {
+  describe('buildMetadata', () => {
     it('should build metadata section', () => {
       const metadata = {
         name: 'Test',
@@ -102,8 +96,8 @@ describe('GpxBuilder', () => {
         author: 'Tester'
       };
 
-      const result = builder._buildMetadata(metadata);
-      expect(result).to.deep.equal([{
+      const result = buildMetadata(metadata);
+      expect(result).toEqual([{
         name: ['Test'],
         desc: ['Description'],
         time: ['2025-05-18T18:00:00Z']
@@ -111,20 +105,20 @@ describe('GpxBuilder', () => {
     });
   });
 
-  describe('_buildWaypoints', () => {
+  describe('buildWaypoints', () => {
     it('should build waypoints section', () => {
       const waypoints = [
         { $: { lat: '45.0', lon: '-75.0' }, name: 'WP1', sym: 'Flag' },
         { $: { lat: '46.0', lon: '-76.0' }, desc: 'Waypoint 2' }
       ];
 
-      const result = builder._buildWaypoints(waypoints);
+      const result = buildWaypoints(waypoints);
       
-      expect(result).to.have.length(2);
-      expect(result[0].$).to.deep.equal({ lat: '45.0', lon: '-75.0' });
-      expect(result[0].name).to.deep.equal(['WP1']);
-      expect(result[1].$).to.deep.equal({ lat: '46.0', lon: '-76.0' });
-      expect(result[1].desc).to.deep.equal(['Waypoint 2']);
+      expect(result).toHaveLength(2);
+      expect(result[0].$).toEqual({ lat: '45.0', lon: '-75.0' });
+      expect(result[0].name).toEqual(['WP1']);
+      expect(result[1].$).toEqual({ lat: '46.0', lon: '-76.0' });
+      expect(result[1].desc).toEqual(['Waypoint 2']);
     });
   });
 });
