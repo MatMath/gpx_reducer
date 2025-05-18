@@ -1,11 +1,18 @@
 {
   "name": "gpx_map",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "processGpx.js",
+  "type": "module",
   "scripts": {
+    "start": "node processGpx.js",
+    "process": "node processGpx.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "GPX file processor for optimizing and analyzing GPS track data",
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "xml2js": "^0.6.2"
+  }
 }
