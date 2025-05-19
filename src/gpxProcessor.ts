@@ -12,19 +12,34 @@ const __dirname = path.dirname(__filename);
 // Types
 export interface GpxJsonData {
   gpx: {
-    rte?: Route | Route[];
-    wpt?: any[];
-    trk?: any[];
-    [key: string]: any;
+    xmlns: string;
+    version: string;
+    creator: string;
+    metadata: {
+      link: {
+        href: string;
+      };
+    };
+    trk: Route[];
+    wpt: any[];
   };
 }
 
 export interface Route {
-  rtept?: Point | Point[];
-  name?: string;
+  name: { value: string };
+  trkseg: {
+    trkpt: Point[];
+    extensions?: {
+      navionics_start_time: string;
+      navionics_end_time: string;
+    };
+  };
   stats?: any;
   [key: string]: any;
 }
+// rtept?: Point | Point[];
+// name?: string;
+// }
 
 export interface ProcessFileResult {
   inputFile: string;
@@ -66,7 +81,16 @@ export const parseGpxToJson = async (
     return new Promise((resolve, reject) => {
       parseString(
         xmlData,
-        { explicitArray: false, mergeAttrs: true },
+        {
+          explicitArray: false,
+          mergeAttrs: true,
+          explicitRoot: true,
+          explicitChildren: true,
+          preserveChildrenOrder: true,
+          attrkey: "attrs",
+          charkey: "value",
+          trim: true,
+        },
         (err, result) => {
           if (err) {
             reject(new Error(`Error parsing XML: ${err.message}`));
@@ -185,17 +209,17 @@ export const processFile = async (
     const jsonData = await parseGpxToJson(filePath);
 
     // Process routes if they exist
-    if (jsonData.gpx.rte) {
-      const routes = Array.isArray(jsonData.gpx.rte)
-        ? jsonData.gpx.rte
-        : [jsonData.gpx.rte];
+    if (jsonData.gpx.trk) {
+      const routes = Array.isArray(jsonData.gpx.trk)
+        ? jsonData.gpx.trk
+        : [jsonData.gpx.trk];
 
       routes.forEach((route) => {
-        if (route.rtept) {
+        if (route.trkseg) {
           // Ensure we have an array of points
-          const originalPoints = Array.isArray(route.rtept)
-            ? route.rtept
-            : [route.rtept];
+          const originalPoints = Array.isArray(route.trkseg.trkpt)
+            ? route.trkseg.trkpt
+            : [route.trkseg.trkpt];
 
           // Filter out any invalid points (missing lat/lon)
           const validPoints = originalPoints.filter(
@@ -224,16 +248,16 @@ export const processFile = async (
             route.stats = stats;
 
             // Replace with reduced points
-            route.rtept = reducedPoints;
+            route.trkseg.trkpt = reducedPoints;
           } else {
             // If not enough valid points, use default stats
             route.stats = calculateRouteStatistics([], []);
-            route.rtept = validPoints;
+            route.trkseg.trkpt = validPoints;
           }
         } else {
           // If no points, use default stats
           route.stats = calculateRouteStatistics([], []);
-          route.rtept = [];
+          route.trkseg.trkpt = [];
         }
       });
     }
@@ -248,9 +272,9 @@ export const processFile = async (
     const result: ProcessFileResult = {
       inputFile: filePath,
       outputFile: outputPath,
-      routeCount: jsonData.gpx.rte
-        ? Array.isArray(jsonData.gpx.rte)
-          ? jsonData.gpx.rte.length
+      routeCount: jsonData.gpx.trk
+        ? Array.isArray(jsonData.gpx.trk)
+          ? jsonData.gpx.trk.length
           : 1
         : 0,
       waypointCount: jsonData.gpx.wpt
@@ -267,10 +291,10 @@ export const processFile = async (
     };
 
     // Add detailed stats for each route if they exist
-    if (jsonData.gpx.rte) {
-      const routes = Array.isArray(jsonData.gpx.rte)
-        ? jsonData.gpx.rte
-        : [jsonData.gpx.rte];
+    if (jsonData.gpx.trk) {
+      const routes = Array.isArray(jsonData.gpx.trk)
+        ? jsonData.gpx.trk
+        : [jsonData.gpx.trk];
       result.stats = routes.map((route) => route.stats || {});
     }
 

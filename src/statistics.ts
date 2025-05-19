@@ -8,6 +8,13 @@
 export interface Point {
   lat: number | string;
   lon: number | string;
+  ele?: string;
+  time?: string;
+  extensions?: {
+    navionics_speed?: string;
+    navionics_haccuracy?: string;
+    navionics_vaccuracy?: string;
+  };
   [key: string]: any; // Allow additional properties
 }
 
