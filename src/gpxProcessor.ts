@@ -6,6 +6,36 @@ import { DirectionUtils } from "./directionUtils";
 import { calculateRouteStatistics } from "./statistics";
 import type { Point } from "./statistics";
 
+/**
+ * Recursively cleans parsed XML data by removing metadata and normalizing structure
+ */
+const cleanParsedData = (data: any): any => {
+  if (Array.isArray(data)) {
+    return data.map(cleanParsedData);
+  }
+  
+  if (data !== null && typeof data === 'object') {
+    // Create a new object without the XML metadata
+    const result: Record<string, any> = {};
+    
+    for (const [key, value] of Object.entries(data)) {
+      // Skip XML metadata keys
+      if (key.startsWith('#')) continue;
+      
+      // Handle value objects (like { value: 'actualValue', ... })
+      if (value && typeof value === 'object' && 'value' in value) {
+        result[key] = cleanParsedData(value.value);
+      } else {
+        result[key] = cleanParsedData(value);
+      }
+    }
+    
+    return result;
+  }
+  
+  return data;
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -37,10 +67,6 @@ export interface Route {
   stats?: any;
   [key: string]: any;
 }
-// rtept?: Point | Point[];
-// name?: string;
-// }
-
 export interface ProcessFileResult {
   inputFile: string;
   outputFile: string;
@@ -121,8 +147,10 @@ export const saveJson = async (
   data: any,
   outputDir: string = DEFAULT_DIRS.output
 ): Promise<string> => {
+  // Clean the data before saving
+  const cleanedData = cleanParsedData(data);
   const outputPath = path.join(outputDir, `${fileName}.json`);
-  await fs.writeJson(outputPath, data, { spaces: 2 });
+  await fs.writeJson(outputPath, cleanedData, { spaces: 2 });
   console.log(`JSON saved to: ${outputPath}`);
   return outputPath;
 };
@@ -241,7 +269,7 @@ export const processFile = async (
 
             // Add route name to stats if available
             if (route.name) {
-              stats.name = route.name;
+              stats.name = route.name.value;
             }
 
             // Add statistics to the route
@@ -257,7 +285,7 @@ export const processFile = async (
         } else {
           // If no points, use default stats
           route.stats = calculateRouteStatistics([], []);
-          route.trkseg.trkpt = [];
+          route.trkseg = { trkpt: [] };
         }
       });
     }

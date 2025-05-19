@@ -1,18 +1,7 @@
 import { Builder } from 'xml2js';
 
 // Types
-type Point = {
-  $?: { lat: string | number; lon: string | number };
-  lat?: string | number;
-  lon?: string | number;
-  ele?: string | number;
-  time?: string;
-  name?: string;
-  desc?: string;
-  sym?: string;
-  type?: string;
-  [key: string]: any;
-};
+import { Point, Route } from './types';
 
 type Metadata = {
   name?: string;
@@ -26,24 +15,6 @@ type Metadata = {
   [key: string]: any;
 };
 
-type Route = {
-  name?: string;
-  desc?: string;
-  number?: string | number;
-  type?: string;
-  rtept?: Point[];
-  [key: string]: any;
-};
-
-type Track = {
-  name?: string;
-  desc?: string;
-  number?: string | number;
-  type?: string;
-  trkseg?: Array<{ trkpt: Point[] }>;
-  [key: string]: any;
-};
-
 type GpxData = {
   version?: string;
   creator?: string;
@@ -53,16 +24,13 @@ type GpxData = {
   waypoints?: Point[];
   rte?: Route[];
   routes?: Route[];
-  trk?: Track[];
-  tracks?: Track[];
+  trk?: Route['trkseg'][];
+  tracks?: Route['trkseg'][];
   [key: string]: any;
 };
 
 // XML Builder instance
-const builder = new Builder({
-  xmldec: { version: '1.0', encoding: 'UTF-8' },
-  headless: true
-});
+const builder = new Builder();
 
 /**
  * Build track points
@@ -93,29 +61,33 @@ const buildTrackPoints = (points: Point[] = []): any[] => {
 /**
  * Build track segments
  */
-const buildTrackSegments = (segments: Array<{ trkpt?: Point[] }> = []): any[] => {
-  if (!Array.isArray(segments)) return [];
+const buildTrackSegments = (segments: Route['trkseg']): Route['trkseg'] => {
+
+  if (!segments) return {
+    trkpt: []
+  };
   
-  return segments.map(segment => ({
-    trkpt: buildTrackPoints(segment.trkpt)
-  }));
+  return {
+    trkpt: buildTrackPoints(segments.trkpt)
+  };
 };
 
 /**
  * Build tracks section
  */
-const buildTracks = (tracks: Track[] = []): any[] => {
+const buildTracks = (tracks: Route['trkseg'][] = []): any[] => {
   if (!Array.isArray(tracks)) return [];
   
   return tracks.map(track => {
     const trk: Record<string, any> = {
-      name: track.name ? [track.name] : undefined,
-      desc: track.desc ? [track.desc] : undefined,
-      number: track.number ? [track.number] : undefined,
-      type: track.type ? [track.type] : undefined,
+      name: track.name,
+      // desc: track.desc ? [track.desc] : undefined,
+      // number: track.number ? [track.number] : undefined,
+      // type: track.type ? [track.type] : undefined,
       trkseg: buildTrackSegments(track.trkseg)
     };
     
+    console.log('track', Object.keys(track));
     Object.keys(trk).forEach(key => trk[key] === undefined && delete trk[key]);
     return trk;
   });
@@ -248,7 +220,7 @@ const buildGpx = (jsonData: GpxData): string => {
       ...(jsonData.metadata ? { metadata: buildMetadata(jsonData.metadata) } : {}),
       ...(jsonData.wpt || jsonData.waypoints ? { wpt: buildWaypoints(jsonData.wpt || jsonData.waypoints) } : {}),
       ...(jsonData.rte || jsonData.routes ? { rte: buildRoutes(jsonData.rte || jsonData.routes) } : {}),
-      ...(jsonData.trk || jsonData.tracks ? { trk: buildTracks(jsonData.trk || jsonData.tracks) } : {})
+      ...(jsonData.trk ? { trk: buildTracks(jsonData.trk) } : {})
     }
   };
 
@@ -272,5 +244,4 @@ export type {
   Metadata,
   Point,
   Route,
-  Track
 };
