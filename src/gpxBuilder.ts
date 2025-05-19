@@ -87,7 +87,6 @@ const buildTracks = (tracks: Route['trkseg'][] = []): any[] => {
       trkseg: buildTrackSegments(track.trkseg)
     };
     
-    console.log('track', Object.keys(track));
     Object.keys(trk).forEach(key => trk[key] === undefined && delete trk[key]);
     return trk;
   });

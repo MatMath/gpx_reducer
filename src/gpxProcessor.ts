@@ -3,7 +3,7 @@ import path from "path";
 import { parseString } from "xml2js";
 import { fileURLToPath } from "url";
 import { DirectionUtils } from "./directionUtils";
-import { calculateRouteStatistics } from "./statistics";
+import { calculateDistance, calculateRouteStatistics } from "./statistics";
 import type { Point } from "./statistics";
 
 /**
@@ -192,6 +192,12 @@ export const reducePointsByDirection = (points: Point[]): Point[] => {
       currentPoint
     );
 
+    const distanceBetweenPoints = calculateDistance(currentPoint, nextPoint);
+
+    // Skip points that are too close to each other  less than 20m.
+    if (distanceBetweenPoints < 0.01) {
+      continue;
+    }
     // Check if direction has changed for either lat or lon
     if (
       newDirections.lat !== directions.lat ||
