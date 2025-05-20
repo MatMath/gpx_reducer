@@ -43,6 +43,15 @@ async function main() {
     }
 
     console.log(`Found ${inputFiles.length} GPX file(s) to process\n`);
+    
+    // Array to store all statistics
+    const allStats: Array<{
+      fileName: string;
+      stats: any[];
+      routeCount: number;
+      waypointCount: number;
+      trackCount: number;
+    }> = [];
 
     // Process each file
     for (const file of inputFiles) {
@@ -52,6 +61,15 @@ async function main() {
         console.log(`  Routes: ${result.routeCount}`);
         console.log(`  Waypoints: ${result.waypointCount}`);
         console.log(`  Tracks: ${result.trackCount}`);
+
+        // Save statistics for JSON output
+        allStats.push({
+          fileName: path.basename(file),
+          stats: result.stats || [],
+          routeCount: result.routeCount,
+          waypointCount: result.waypointCount,
+          trackCount: result.trackCount
+        });
 
         // Display statistics for each route
         if (result.stats && result.stats.length > 0) {
@@ -94,17 +112,15 @@ async function main() {
       }
     }
 
-    console.log("Processing complete!");
-
-    // Automatically convert the generated JSON files to GPX
-    console.log("\nConverting JSON files to GPX...");
     const outputDir = path.join(__dirname, "../output");
+    console.log("\nConverting JSON files to GPX...");
     const jsonFiles = fs
       .readdirSync(outputDir)
       .filter(
         (file) => file.endsWith(".json") && !file.endsWith("-reduced.json")
       );
 
+    // Automatically convert the generated JSON files to GPX
     for (const jsonFile of jsonFiles) {
       const jsonPath = path.join(outputDir, jsonFile);
       const gpxPath = jsonPath.replace(/\.json$/, ".gpx");
@@ -125,6 +141,18 @@ async function main() {
       } catch (error) {
         console.error(`  ✗ Failed to convert ${jsonFile}:`, error.message);
       }
+    }
+
+        // Automatically convert the generated JSON files to GPX
+    // Save all statistics to a JSON file
+    const statsFilePath = path.join(outputDir, 'statistics.json');
+    
+    try {
+      await fs.ensureDir(outputDir);
+      await fs.writeJson(statsFilePath, allStats, { spaces: 2 });
+      console.log(`\n✓ Statistics saved to: ${statsFilePath}`);
+    } catch (error) {
+      console.error('\nError saving statistics:', error.message);
     }
 
     console.log("\nAll conversions complete!");
