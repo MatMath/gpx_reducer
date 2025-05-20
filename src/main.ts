@@ -68,6 +68,8 @@ async function main() {
             );
             console.log(`    Boat distance: ${stat.boatDistance} nm`);
             console.log(`    Direction changes: ${stat.directionChanges}`);
+            console.log(`    Total hours: ${stat.totalHours}`);
+            console.log(`    Max speed: ${stat.maxSpeed}`);
 
             // Display initial direction and segment length if available
             if (stat.directions && stat.directions.length > 0) {

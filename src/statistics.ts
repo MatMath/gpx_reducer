@@ -9,9 +9,15 @@ export interface Point {
   lat: number | string;
   lon: number | string;
   ele?: string;
-  time?: string;
+  time?: {
+    value: string;
+    "#name": string;
+  };
   extensions?: {
-    navionics_speed?: string;
+    navionics_speed?: {
+      value: string;
+      "#name": string;
+    };
     navionics_haccuracy?: string;
     navionics_vaccuracy?: string;
   };
@@ -41,6 +47,8 @@ interface RouteStatistics {
     start: null | Point;
     end: null | Point;
   };
+  totalHours: number;
+  maxSpeed: number;
   name?: string;
 }
 
@@ -193,6 +201,8 @@ function calculateRouteStatistics(
       start: null,
       end: null,
     },
+    totalHours: 0,
+    maxSpeed: 0,
   };
 
   try {
@@ -284,6 +294,30 @@ function calculateRouteStatistics(
       }
     }
 
+    // Calculate total hours from first to last point
+    let totalHours = 0;
+    const lastPoint = originalPoints[originalLength - 1];
+    if (
+      originalLength >= 2 &&
+      originalPoints[0].time &&
+      lastPoint.time
+    ) {
+      const startTime = new Date(originalPoints[0].time.value).getTime();
+      const endTime = new Date(lastPoint.time.value).getTime();
+      totalHours = (endTime - startTime) / (1000 * 60 * 60); // Convert ms to hours
+    }
+
+    // Find maximum speed from all points
+    let maxSpeed = 0;
+    for (const point of originalPoints) {
+      if (point.extensions?.navionics_speed?.value) {
+        const speed = parseFloat(point.extensions.navionics_speed.value);
+        if (!isNaN(speed) && speed > maxSpeed) {
+          maxSpeed = speed;
+        }
+      }
+    }
+
     return {
       originalPoints: originalLength,
       reducedPoints: reducedLength,
@@ -296,6 +330,8 @@ function calculateRouteStatistics(
         start: null,
         end: null,
       },
+      totalHours: parseFloat(totalHours.toFixed(2)),
+      maxSpeed: parseFloat(maxSpeed.toFixed(2)),
     };
   } catch (error) {
     console.error("Error in calculateRouteStatistics:", error);

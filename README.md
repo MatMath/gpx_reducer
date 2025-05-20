@@ -1,6 +1,9 @@
 # Navionic GPS export to Google Map
 
-Navionic GPS export add every meter moved, and this create files of hundred of MB. In order to import into other system like Google Map, we need to reduce the number of points. This script will reduce them.
+Navionic GPS export everything, every meter moved... and this create files of hundred of MB. In order to import into other system like Google Map, we need to reduce the number of points. This script will reduce them.
+Rule: As long as longitude and latitude keep the same direction, we can remove the point. When the direction change, we keep the point. This create start and end point of each section. 
+
+Disclaimer: Might break if schema change, but it worked for me.
 
 ## Usage
 
@@ -16,7 +19,7 @@ Go to Google https://www.google.com/maps/d/u/0/ and import the GPX file from the
 
 ### Prerequisites
 
-- Node.js 16+
+- Node.js 20+
 - npm or yarn
 
 ## Features
@@ -36,4 +39,3 @@ ISC
 ## Acknowledgements
 
 - [xml2js](https://github.com/Leonidas-from-XIV/node-xml2js) - For XML parsing and building
-- [fs-extra](https://github.com/jprichardson/node-fs-extra) - For enhanced filesystem operations
